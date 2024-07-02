@@ -1,11 +1,6 @@
 const mongoose = require("mongoose");
 
-const radingSchema = mongoose.Schema(
-    {   
-        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-        grade:{type:Number, required:true}
-    }
-)
+ 
 
 const bookSchema = new mongoose.Schema(
     {
@@ -15,11 +10,13 @@ const bookSchema = new mongoose.Schema(
         imageUrl:{type:String, required:true},
         year:{type:Number, required:true},
         genre:{type:String, required:true},
-        ratings: [radingSchema],
+        ratings: {
+            userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+            grade:{type:Number, required:true}
+        },
         averageRating:{type:Number, default: 0}
     }
 )
 
-const bookModel = mongoose.model("Book", bookSchema)
+module.exports = mongoose.model("Book", bookSchema)
 
-module.exports = bookModel
