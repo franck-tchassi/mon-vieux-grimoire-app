@@ -3,6 +3,7 @@ const cors = require('cors')
 const mongoose = require('mongoose');
 require('dotenv').config();
 const userRoutes = require('./routes/user');
+const bookRouter = require('./routes/book')
 const bodyParser = require('body-parser');
 
 //config app
@@ -37,7 +38,8 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.use('/api/auth', userRoutes)
+app.use('/api/auth', userRoutes);
+app.use('/api', bookRouter)
 
 
 
