@@ -35,6 +35,32 @@ exports.createBook =  (req, res, next)=>{
     .catch((error)=>{res.status(400).json({error})})
 }
 
+//delete
+exports.deleteBook = (req, res, next) => {
+  // Récupération du livre à supprimer
+  Book.findOne({ _id: req.params.id })
+    .then((book) => {
+      // Le livre ne peut être supprimé que par le créateur de sa fiche
+      if (book.userId != req.auth.userId) {
+        res.status(401).json({ message: "Suppression non autorisée" });
+      } else {
+        // Séparation du nom du fichier image
+        const filename = book.imageUrl.split("/images/")[1];
+        // Suppression du fichier image puis suppression du livre dans la base de données dans le callback
+        fs.unlink(`images/${filename}`, () => {
+          Book.deleteOne({ _id: req.params.id })
+            .then(() => {
+              res.status(200).json({ message: "Livre supprimé !" });
+            })
+            .catch((error) => res.status(401).json({ error }));
+        });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
+};
+
 
 
 
