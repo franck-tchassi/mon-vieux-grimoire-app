@@ -1,12 +1,23 @@
 const Book = require("../models/book")
+const fs = require("fs");
+
+
+//get - renvoie à la bibliothèque (plusieurs livres)
+exports.library = (req, res, next) => {
+  Book.find()
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(400).json({ error }));
+};
+
+//get - renvoie un livre (id)
+exports.oneBook = (req, res, next) => {
+  Book.findOne({ _id: req.params.id })
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(400).json({ error }));
+};
 
 
 
-exports.getAllBook = (req, res, next) =>{
-    Book.find()
-    .then((book)=>{ res.status(200).json(book)})
-    .catch((error)=> res.status(400).json({error: error}))
-}
 
 
 
@@ -15,48 +26,6 @@ exports.getAllBook = (req, res, next) =>{
 
 
 
-
-
-exports.createBook = async (req, res)=>{
-    
-    //validation de tous les données
-    const {title, author, year, genre, ratings} = req.body
-    if(!title || !author || !year || !genre || !ratings){
-        res.status(400).json({success: false, message: "Tous les champs sont requis"})
-    }
-
-    //calcul note moyenne du livre
-    //const valueRating = ratings.every(rating => rating.grade >= 1 && rating.grade <=5)
-    const totalRatings = ratings.lenght
-    const sumRatings = ratings.reduce((sum, rating)=> sum + rating.grade, 0)
-    const averageRating = totalRatings===0 ? 0 :  sumRatings / totalRatings
-
-    //creation url de l'image
-    let image_Filename = `${req.file.filename}`
-
-    //creation nouvel objet book
-    const book = new Book(
-        {
-            title: title,
-            author: author,
-            imageUrl:image_Filename,
-            year: year,
-            genre: genre,
-            ratings: ratings,
-            averageRating: averageRating
-        }
-    )
-    try{
-        await book.save()
-        res.status(201).json({ success: true, message: "Un livre a été ajouté" });
-    }
-    catch(error){
-        console.log(error)
-        res.status(500).json({ success: false, message: "Échec de l'ajout du livre" });
-    }
-    
-    
-}
 
 
 
