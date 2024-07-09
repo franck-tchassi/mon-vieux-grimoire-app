@@ -61,6 +61,47 @@ exports.deleteBook = (req, res, next) => {
     });
 };
 
+// post - affecte une note (id)
+exports.rateBook = (req, res, next) => {
+    const userId = req.auth.userId;
+    const { grade } = req.body;
+
+    // Vérifier si la note est comprise entre 0 et 5
+    if (grade < 0 || grade > 5) {
+        return res.status(400).json({ message: "La note doit être comprise entre 0 et 5." });
+    }
+
+    Book.findOne({ _id: req.params.id })
+        .then((book) => {
+            if (!book) {
+                return res.status(404).json({ message: "Livre non trouvé." });
+            }
+
+            const userRating = book.ratings.find(
+                (r) => r.userId.toString() === userId
+            );
+            if (userRating) {
+                return res.status(400).json({ message: "Vous avez déjà noté ce livre." });
+            }
+
+            // Ajouter la nouvelle note
+            book.ratings.push({ userId, grade });
+
+            // Mettre à jour la moyenne des notes
+            const totalRatings = book.ratings.length;
+            const averageRating = book.ratings.reduce((sum, rating) => sum + rating.grade, 0) / totalRatings;
+            book.averageRating = Math.round(averageRating);
+
+            // Sauvegarder les modifications
+            book.save()
+                .then((updatedBook) => {
+                    res.status(200).json(updatedBook);
+                })
+                .catch((error) => res.status(400).json({ error }));
+        })
+        .catch((error) => res.status(400).json({ error }));
+};
+
 
 
 
