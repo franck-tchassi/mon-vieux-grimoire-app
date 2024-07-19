@@ -122,43 +122,44 @@ exports.updateBook = (req, res, next) => {
 
 
 // post - affecte une note (id)
-exports.rateBook = (req, res, next) => {
-  const userId = req.auth.userId;
-  const { grade } = req.body;
-
-  if (grade < 0 || grade > 5) {
-    return res.status(400).json({ message: "La note doit être comprise entre 0 et 5." });
-  }
-
-  Book.findOne({ _id: req.params.id })
-    .then((book) => {
-      if (!book) {
-        return res.status(404).json({ message: "Livre non trouvé." });
+exports.rateBook = async (req, res, next) => {
+  
+    try {
+      const requestUserId = req.body.userId
+      const requestRating = req.body.rating
+      const newRating = {
+          userId: requestUserId,
+          grade: requestRating,
       }
 
-      const userRating = book.ratings.find((rate) => rate.toString() === userId);
-      if (userRating) {
-        return res.status(400).json({ message: "Vous avez déjà noté ce livre." });
-        
+      const book = await Book.findById(req.params.id)
+      const rateUserIdExists = book.ratings.some(
+          (rating) => rating.userId === requestUserId
+      )
+
+      if (
+          requestUserId === book.userId ||
+          (rateUserIdExists && requestRating >= 0 && requestRating <= 5)
+      ) {
+          // Erreur non gérer dans le frontend :
+          // res.status(400).json({ message: "Vous n'avez pas le droit" })
+          // Pour éviter un crash du serveur je retourne exceptionnellement une réponse 200 avec le book
+          return res.status(200).json(book)
       }
 
-      // Ajouter la nouvelle note
-      book.ratings.push({ userId, grade});
-      
-      // Mettre à jour la moyenne des notes
+      //add new rating
+      book.ratings.push(newRating)
+
       const totalRatings = book.ratings.length;
       const averageRating = book.ratings.reduce((sum, rating) => sum + rating.grade, 0) / totalRatings;
-      book.averageRating = Math.round(averageRating * 10) / 10; // Arrondir à une décimale
+      book.averageRating = Math.round(averageRating * 10) / 10; // arrondi à une décimale
+
+      const updatedBook = await book.save();
+      res.status(200).json(updatedBook);
       
-      // Sauvegarder les modifications
-      book.save()
-        .then((updatedBook) =>{ 
-          res.status(200).json(updatedBookObject);
-        })
-        .catch((error) => res.status(400).json({ error }));
-    })
-    .catch((error) => res.status(400).json({ error }));
-    
+    } catch (error) {
+    res.status(400).json({ error });
+  }
 };
 
 // get - renvoie les livres avec la meilleure note
