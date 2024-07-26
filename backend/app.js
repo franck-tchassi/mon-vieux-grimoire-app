@@ -2,10 +2,18 @@ const express = require('express');
 const cors = require('cors')
 const mongoose = require('mongoose');
 require('dotenv').config();
+<<<<<<< HEAD
 const userRoutes = require('./routes/user.js');
 const bookRouter = require('./routes/book.js')
 const bodyParser = require('body-parser');
 const path = require('path')
+=======
+const userRoutes = require('./routes/user');
+const bookRouter = require('./routes/book')
+const bodyParser = require('body-parser');
+const path = require('path')
+
+>>>>>>> 8ae4bc96173989aa7b179a374f19d07eba26d527
 
 //config app
 const app = express()
@@ -50,9 +58,14 @@ app.use('/images', express.static(path.join(__dirname, 'images'), {
 
 app.use(bodyParser.json());
 
+<<<<<<< HEAD
 app.use('/api/auth', userRoutes);
 app.use('/api/books', bookRouter);
 
+=======
+app.use('/api/auth', userRoutes)
+app.use('/api/books', bookRouter)
+>>>>>>> 8ae4bc96173989aa7b179a374f19d07eba26d527
 
 
 
