@@ -1,6 +1,5 @@
 const jwt = require("jsonwebtoken");
 
-<<<<<<< HEAD
 module.exports = (req, res, next) => {
   try {
     // Correctly split the Authorization header
@@ -13,7 +12,7 @@ module.exports = (req, res, next) => {
     res.status(401).json({ error: 'Unauthorized request' });
   }
 };
-=======
+
 
 module.exports = (req, res, next) =>{
     try{
@@ -29,4 +28,4 @@ module.exports = (req, res, next) =>{
         res.status(401).json({error});
     }
 }
->>>>>>> 8ae4bc96173989aa7b179a374f19d07eba26d527
+

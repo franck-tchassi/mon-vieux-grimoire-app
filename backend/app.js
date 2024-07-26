@@ -1,45 +1,29 @@
 const express = require('express');
-const cors = require('cors')
+const cors = require('cors');
 const mongoose = require('mongoose');
 require('dotenv').config();
-<<<<<<< HEAD
-const userRoutes = require('./routes/user.js');
-const bookRouter = require('./routes/book.js')
-const bodyParser = require('body-parser');
-const path = require('path')
-=======
 const userRoutes = require('./routes/user');
-const bookRouter = require('./routes/book')
+const bookRouter = require('./routes/book');
 const bodyParser = require('body-parser');
-const path = require('path')
+const path = require('path');
 
->>>>>>> 8ae4bc96173989aa7b179a374f19d07eba26d527
+// Configuration de l'application
+const app = express();
 
-//config app
-const app = express()
+// Middleware
+app.use(express.json());
+app.use(cors());
 
-//middleware
-app.use(express.json())
-app.use(cors({
-  origin: 'http://localhost:3000' // Permettre les requêtes depuis le frontend sur le port 3000
-}));
-
-//config dataBase
-const mongoURI = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@expressapi.jhhn6o8.mongodb.net/${process.env.dbName}?retryWrites=true&w=majority&appName=ExpressApi`
+// Configuration de la base de données
+const mongoURI = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@expressapi.jhhn6o8.mongodb.net/${process.env.dbName}?retryWrites=true&w=majority&appName=ExpressApi`;
 mongoose.connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
 })
-.then(()=> console.log("connexion db success !"))
+.then(() => console.log("connexion db success !"))
 .catch((error) => console.error("connexion db failed:", error.message));
 
-
-
-
-
-
-
-
+// Middleware pour les en-têtes CORS
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
@@ -58,16 +42,7 @@ app.use('/images', express.static(path.join(__dirname, 'images'), {
 
 app.use(bodyParser.json());
 
-<<<<<<< HEAD
 app.use('/api/auth', userRoutes);
 app.use('/api/books', bookRouter);
 
-=======
-app.use('/api/auth', userRoutes)
-app.use('/api/books', bookRouter)
->>>>>>> 8ae4bc96173989aa7b179a374f19d07eba26d527
-
-
-
-
-module.exports = app
+module.exports = app;
