@@ -3,7 +3,7 @@ const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 const { isEmail, isStrongPassword } = require("validator")
 
-exports.signup = async (req, res, next) => {
+exports.signUp = async (req, res, next) => {
     try {
         const hash = await bcrypt.hash(req.body.password, 10)
         const user = new User({
