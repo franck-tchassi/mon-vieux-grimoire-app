@@ -83,53 +83,49 @@ exports.deleteBook = (req, res, next) => {
 
 
 
-//put - MAJ un livre (id)
-exports.updateBook = (req, res, next) => {
-  // Stockage de la requête en JSON dans une constante
-  const bookObject = req.file
-    ? {
-        ...JSON.parse(req.body.book),
-        imageUrl: `${req.protocol}://${req.get("host")}/images/${
-          req.file.filename
-        }`,
-      }
-    : { ...req.body };
-  // Suppression de _userId auquel on ne peut faire confiance
-  delete bookObject._userId;
-  // Récupération du livre existant à modifier
-  Book.findOne({ _id: req.params.id })
-    .then((book) => {
-      if (book.userId != req.auth.userId) {
-        res.status(401).json({ message: "Mise à jour non autorisée" });
-      }
-
-      // Séparation du nom du fichier image existant
-      const filename = book.imageUrl.split("/images/")[1];
-      console.log(filename);
-
-      // Si l'image a été modifiée, on supprime l'ancienne
-      if (req.file && fs.existsSync(`images/${filename}`)) {
-        fs.unlink(`images/${filename}`, (error) => {
-          if (error) {
-            throw new Error(error);
+//put - Modifier un livre (id)
+exports.updateBook = async (req, res, next) => {
+  try {
+      let bookObject
+      if (!req.file) {
+          bookObject = req.body
+      } else {
+          bookObject = {
+              ...JSON.parse(req.body.book),
+              imageUrl: `${req.protocol}://${req.get("host")}/images/${
+                  req.file.filename
+              }`,
           }
-        });
       }
-        // Mise à jour du livre
-        Book.updateOne(
-          { _id: req.params.id },
-          { ...bookObject, _id: req.params.id }
-        )
-          .then(() => res.status(200).json({ message: "Livre modifié!" }))
-          .catch((error) => res.status(401).json({ error }));
-      /*} else {
-        res.status(400).json({ message: "La photo n'existe pas!" });
-      }*/
-    })
-    .catch((error) => {
-      res.status(400).json({ error });
-    });
-};
+
+      delete bookObject._userId
+      const book = await Book.findOne({ _id: req.params.id })
+      if (!book) {
+          return res.status(404).json({ message: "book not found" })
+      }
+      if (book.userId != req.auth.userId) {
+          return res.status(401).json({ message: "not authorized" })
+      }
+
+      try {
+          if (req.file && book.imageUrl) {
+              const filename = book.imageUrl.split("/images/")[1]
+              await fs.unlink(`images/${filename}`)
+          }
+
+          await Book.updateOne(
+              { _id: req.params.id },
+              { ...bookObject, _id: req.params.id }
+          )
+          res.status(200).json({ message: "book modified" })
+      } catch (error) {
+          res.status(400).json({ error })
+      }
+  } catch (error) {
+      res.status(400).json({ error })
+      console.log("erreur ici")
+  }
+}
 
 
 
